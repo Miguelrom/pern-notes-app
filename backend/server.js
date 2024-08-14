@@ -27,20 +27,16 @@ app.all('*', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 try {
-
-  setInterval(async () => {
-    await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
-
-  }, 1500)
-
+  await sequelize.authenticate();
+  await sequelize.sync({ alter: true });
   console.log('Postgres database connected');
 } catch (error) {
   console.error('Unable to connect to the database:', error);
 }
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 

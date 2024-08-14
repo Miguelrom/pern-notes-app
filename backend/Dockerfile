@@ -1,14 +1,13 @@
-FROM node:20.10.0
+FROM node:20-alpine
 
-# Create app directory
-WORKDIR /usr/src/app
+WORKDIR /usr/local/app
 
-COPY package.json /usr/src/app/package.json
-COPY yarn.lock /usr/src/app/yarn.lock
+COPY package.json yarn.lock ./
+
 RUN yarn
 
-COPY . /usr/src/app
+COPY . .
 
 EXPOSE 3000
 
-CMD [ "yarn", "run", "dev" ]
+CMD [ "node", "server.js"]

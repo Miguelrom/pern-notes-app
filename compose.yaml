@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      - PGUSER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=ensolversdb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      - PORT=3000
+      - DB_URI=postgres://postgres:mypassword@db:5432/ensolversdb
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /usr/local/app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: ./backend/package.json
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports: 
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_BACKEND_URL=http://localhost:3000
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /usr/local/app
+          ignore: 
+            - node_modules
+
+volumes:
+  pg-data:
